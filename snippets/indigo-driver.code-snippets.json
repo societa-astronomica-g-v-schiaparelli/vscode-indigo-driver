@@ -1,0 +1,310 @@
+{
+  "Driver (serial)": {
+    "prefix": ["driver-serial", "driver"],
+    "description": "Serial (also TCP/UDP) driver skeleton",
+    "body": [
+      "// ${2:Device} driver definition",
+      "",
+      "driver ${1:name} {",
+      "\tlabel = \"${2:Device}\";",
+      "\tauthor = \"${3:Author Name <author@example.com>}\";",
+      "\tcopyright = \"Copyright (c) ${CURRENT_YEAR} ${4:Copyright holder}\";",
+      "\tversion = 1;",
+      "\tserial {",
+      "\t\tpattern {",
+      "\t\t\tvid = ${5:0x0403};",
+      "\t\t\tpid = ${6:0x6001};",
+      "\t\t}",
+      "\t}",
+      "\tdata {",
+      "\t\tchar response[128];",
+      "\t}",
+      "\tcode {",
+      "\t\tstatic bool ${1}_command(indigo_device *device, const char *format, ...) {",
+      "\t\t\treturn false;",
+      "\t\t}",
+      "",
+      "\t\tstatic bool ${1}_open(indigo_device *device, const char **error_message) {",
+      "\t\t\tPRIVATE_DATA->handle = indigo_uni_open_serial_with_speed2(DEVICE_PORT_ITEM->text.value, ${7:9600}, INDIGO_LOG_DEBUG, error_message);",
+      "\t\t\treturn PRIVATE_DATA->handle != NULL;",
+      "\t\t}",
+      "",
+      "\t\tstatic void ${1}_close(indigo_device *device) {",
+      "\t\t\tindigo_uni_close(&PRIVATE_DATA->handle);",
+      "\t\t}",
+      "\t}",
+      "\t${8|ccd,wheel,focuser,mount,guider,rotator,dome,gps,ao,polaralign,aux|} {",
+      "\t\tname = \"${2}\";",
+      "\t\ton_connect {",
+      "\t\t}",
+      "\t}",
+      "}"
+    ]
+  },
+  "Driver (virtual)": {
+    "prefix": "driver-virtual",
+    "description": "Virtual driver skeleton, no transport",
+    "body": [
+      "driver ${1:name} {",
+      "\tlabel = \"${2:Simulator}\";",
+      "\tauthor = \"${3:Author Name <author@example.com>}\";",
+      "\tcopyright = \"Copyright (c) ${CURRENT_YEAR} ${4:Copyright holder}\";",
+      "\tversion = 1;",
+      "\t${5|ccd,wheel,focuser,mount,guider,rotator,dome,gps,ao,polaralign,aux|} {",
+      "\t\tname = \"${2}\";",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "Device ccd": {
+    "prefix": "ccd",
+    "description": "ccd logical device",
+    "body": ["ccd {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device wheel": {
+    "prefix": "wheel",
+    "description": "wheel logical device",
+    "body": ["wheel {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device focuser": {
+    "prefix": "focuser",
+    "description": "focuser logical device",
+    "body": ["focuser {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device mount": {
+    "prefix": "mount",
+    "description": "mount logical device",
+    "body": ["mount {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device guider": {
+    "prefix": "guider",
+    "description": "guider logical device",
+    "body": ["guider {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device rotator": {
+    "prefix": "rotator",
+    "description": "rotator logical device",
+    "body": ["rotator {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device dome": {
+    "prefix": "dome",
+    "description": "dome logical device",
+    "body": ["dome {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device gps": {
+    "prefix": "gps",
+    "description": "gps logical device",
+    "body": ["gps {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device ao": {
+    "prefix": "ao",
+    "description": "ao logical device",
+    "body": ["ao {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Device aux": {
+    "prefix": "aux",
+    "description": "aux logical device",
+    "body": [
+      "aux {",
+      "\tname = \"${1:Device name}\";",
+      "\tinterface = ${2|INDIGO_INTERFACE_AUX_POWERBOX,INDIGO_INTERFACE_AUX_WEATHER,INDIGO_INTERFACE_AUX_SQM,INDIGO_INTERFACE_AUX_LIGHTBOX,INDIGO_INTERFACE_AUX_DUSTCAP,INDIGO_INTERFACE_AUX_SHUTTER,INDIGO_INTERFACE_AUX_GPIO,INDIGO_INTERFACE_AUX_JOYSTICK|};",
+      "\t$0",
+      "}"
+    ]
+  },
+  "Device polaralign": {
+    "prefix": "polaralign",
+    "description": "polaralign logical device",
+    "body": ["polaralign {", "\tname = \"${1:Device name}\";", "\t$0", "}"]
+  },
+  "Serial transport": {
+    "prefix": "serial",
+    "description": "Serial transport block",
+    "body": ["serial {", "\t$0", "}"]
+  },
+  "Serial transport with speed": {
+    "prefix": "serial-speed",
+    "description": "Serial transport with configurable baud rate",
+    "body": ["serial {", "\tconfigurable_speed = true;", "\t$0", "}"]
+  },
+  "Serial pattern": {
+    "prefix": "pattern",
+    "description": "Serial port matching rule",
+    "body": ["pattern {", "\tvid = ${1:0x0403};", "\tpid = ${2:0x6001};", "}"]
+  },
+  "Property switch": {
+    "prefix": "switch",
+    "description": "Local switch property",
+    "body": [
+      "switch ${1:X_PROPERTY} {",
+      "\tname = \"${1}\";",
+      "\tlabel = \"${2:Label}\";",
+      "\trule = ${3|INDIGO_ONE_OF_MANY_RULE,INDIGO_AT_MOST_ONE_RULE,INDIGO_ANY_OF_MANY_RULE|};",
+      "\ton_change {",
+      "\t\t$0",
+      "\t}",
+      "\titem ${1}_${4:ON} {",
+      "\t\tname = \"${4}\";",
+      "\t\tlabel = \"${5:On}\";",
+      "\t}",
+      "\titem ${1}_${6:OFF} {",
+      "\t\tname = \"${6}\";",
+      "\t\tlabel = \"${7:Off}\";",
+      "\t\tvalue = true;",
+      "\t}",
+      "}"
+    ]
+  },
+  "Property text": {
+    "prefix": "text",
+    "description": "Local text property",
+    "body": [
+      "text ${1:X_PROPERTY} {",
+      "\tname = \"${1}\";",
+      "\tlabel = \"${2:Label}\";",
+      "\ton_change {",
+      "\t\t$0",
+      "\t}",
+      "\titem ${1}_${3:VALUE} {",
+      "\t\tname = \"${3}\";",
+      "\t\tlabel = \"${4:Value}\";",
+      "\t}",
+      "}"
+    ]
+  },
+  "Property number": {
+    "prefix": "number",
+    "description": "Local number property",
+    "body": [
+      "number ${1:X_PROPERTY} {",
+      "\tname = \"${1}\";",
+      "\tlabel = \"${2:Label}\";",
+      "\ton_change {",
+      "\t\t$0",
+      "\t}",
+      "\titem ${1}_${3:VALUE} {",
+      "\t\tname = \"${3}\";",
+      "\t\tlabel = \"${4:Value}\";",
+      "\t\tmin = ${5:0};",
+      "\t\tmax = ${6:100};",
+      "\t\tstep = ${7:1};",
+      "\t\tformat = \"${8:%.0f}\";",
+      "\t}",
+      "}"
+    ]
+  },
+  "Property light": {
+    "prefix": "light",
+    "description": "Local light property",
+    "body": [
+      "light ${1:X_PROPERTY} {",
+      "\tname = \"${1}\";",
+      "\tlabel = \"${2:Label}\";",
+      "\titem ${1}_${3:VALUE} {",
+      "\t\tname = \"${3}\";",
+      "\t\tlabel = \"${4:Value}\";",
+      "\t}",
+      "}"
+    ]
+  },
+  "Property inherited": {
+    "prefix": "inherited",
+    "description": "Customize a property of the device class",
+    "body": ["inherited ${1:PROPERTY} {", "\t$0", "}"]
+  },
+  "Property read-only text": {
+    "prefix": "text-ro",
+    "description": "Read-only text property (no change branch)",
+    "body": [
+      "text ${1:X_INFO} {",
+      "\tname = \"${1}\";",
+      "\tlabel = \"${2:Label}\";",
+      "\tperm = INDIGO_RO_PERM;",
+      "\titem ${1}_${3:VALUE} {",
+      "\t\tname = \"${3}\";",
+      "\t\tlabel = \"${4:Value}\";",
+      "\t}",
+      "}"
+    ]
+  },
+  "Item": {
+    "prefix": "item",
+    "description": "Property item",
+    "body": ["item ${1:ITEM} {", "\tname = \"${2:NAME}\";", "\tlabel = \"${3:Label}\";", "\t$0", "}"]
+  },
+  "Reject change": {
+    "prefix": "reject_change",
+    "description": "Reject a change request before values are copied",
+    "body": ["reject_change {", "\tcondition = ${1:condition};", "\tmessage = \"${2:Message}\";", "}"]
+  },
+  "on_connect": {
+    "prefix": "on_connect",
+    "description": "Connection branch",
+    "body": ["on_connect {", "\tconnection_result = ${1:true};", "\tif (!connection_result) {", "\t\t$0", "\t}", "}"]
+  },
+  "on_disconnect": {
+    "prefix": "on_disconnect",
+    "description": "Disconnection branch",
+    "body": ["on_disconnect {", "\t$0", "}"]
+  },
+  "on_timer": {
+    "prefix": "on_timer",
+    "description": "Polling timer, rescheduled at the end",
+    "body": [
+      "on_timer {",
+      "\t$0",
+      "\tindigo_execute_handler_in(device, ${1:5}, ${2|ccd,wheel,focuser,mount,guider,rotator,dome,gps,ao,polaralign,aux|}_timer_callback);",
+      "}"
+    ]
+  },
+  "on_change": {
+    "prefix": "on_change",
+    "description": "Property change handler",
+    "body": ["on_change {", "\t$0", "}"]
+  },
+  "on_attach": {
+    "prefix": "on_attach",
+    "description": "Attach customization",
+    "body": ["on_attach {", "\t$0", "}"]
+  },
+  "on_detach": {
+    "prefix": "on_detach",
+    "description": "Detach customization",
+    "body": ["on_detach {", "\t$0", "}"]
+  },
+  "code": {
+    "prefix": "code",
+    "description": "Helper code block",
+    "body": ["code {", "\t$0", "}"]
+  },
+  "include": {
+    "prefix": "include",
+    "description": "Extra #include directives",
+    "body": ["include {", "\t$0", "}"]
+  },
+  "define": {
+    "prefix": "define",
+    "description": "Extra #define directives",
+    "body": ["define {", "\t$0", "}"]
+  },
+  "data": {
+    "prefix": "data",
+    "description": "Extra private data fields",
+    "body": ["data {", "\t$0", "}"]
+  },
+  "Serial open/close helpers": {
+    "prefix": "open-close",
+    "description": "Transactional serial open/close helpers",
+    "body": [
+      "static bool ${1:name}_open(indigo_device *device, const char **error_message) {",
+      "\tPRIVATE_DATA->handle = indigo_uni_open_serial_with_speed2(DEVICE_PORT_ITEM->text.value, ${2:9600}, INDIGO_LOG_DEBUG, error_message);",
+      "\treturn PRIVATE_DATA->handle != NULL;",
+      "}",
+      "",
+      "static void ${1}_close(indigo_device *device) {",
+      "\tindigo_uni_close(&PRIVATE_DATA->handle);",
+      "}"
+    ]
+  }
+}

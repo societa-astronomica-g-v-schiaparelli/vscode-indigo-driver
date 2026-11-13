@@ -1,0 +1,10 @@
+**
+!dist/extension.cjs
+!syntaxes/**
+!snippets/**
+!language-configuration.json
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!NOTICE

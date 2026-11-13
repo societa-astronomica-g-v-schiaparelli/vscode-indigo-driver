@@ -1,0 +1,160 @@
+{
+  "name": "indigo-driver",
+  "displayName": "INDIGO Driver Definition",
+  "description": "Syntax highlighting, snippets, outline, diagnostics and generator integration for INDIGO 3 .driver definition files.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "publisher": "societa-astronomica-schiaparelli",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/societa-astronomica-g-v-schiaparelli/vscode-indigo-driver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/societa-astronomica-g-v-schiaparelli/vscode-indigo-driver/issues"
+  },
+  "homepage": "https://github.com/societa-astronomica-g-v-schiaparelli/vscode-indigo-driver#readme",
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters"
+  ],
+  "keywords": [
+    "indigo",
+    "indigo3",
+    "astronomy",
+    "driver",
+    "indigo_generator"
+  ],
+  "engines": {
+    "node": ">=22",
+    "vscode": "^1.90.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "indigo_generator is not run in untrusted workspaces."
+    }
+  },
+  "main": "./dist/extension.cjs",
+  "activationEvents": [],
+  "contributes": {
+    "languages": [
+      {
+        "id": "indigo-driver",
+        "aliases": [
+          "INDIGO Driver",
+          "indigo-driver"
+        ],
+        "extensions": [
+          ".driver"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "indigo-driver",
+        "scopeName": "source.indigo-driver",
+        "path": "./syntaxes/indigo-driver.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.c": "c"
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "indigo-driver",
+        "path": "./snippets/indigo-driver.code-snippets.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "indigoDriver.generate",
+        "title": "Generate C Sources",
+        "category": "INDIGO Driver",
+        "icon": "$(play)"
+      },
+      {
+        "command": "indigoDriver.openGenerated",
+        "title": "Open Generated C Source",
+        "category": "INDIGO Driver"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "indigoDriver.generate",
+          "when": "resourceLangId == indigo-driver",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "indigoDriver.generate",
+          "when": "resourceLangId == indigo-driver"
+        },
+        {
+          "command": "indigoDriver.openGenerated",
+          "when": "resourceLangId == indigo-driver"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "INDIGO Driver",
+      "properties": {
+        "indigoDriver.generatorPath": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Absolute path to the `indigo_generator` executable. When empty, `indigo_generator` is looked up in `PATH`. `~` and variables are not expanded. Only user and remote machine settings apply, a workspace cannot choose the program to run.",
+          "scope": "machine"
+        },
+        "indigoDriver.generateOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Run indigo_generator every time a .driver file is saved."
+        },
+        "indigoDriver.lint.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Report syntax, structural and semantic problems in .driver files while typing. When off, no diagnostics are shown."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[indigo-driver]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 2,
+        "editor.detectIndentation": false,
+        "files.trimTrailingWhitespace": true
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.cjs --sourcemap",
+    "build:min": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.cjs --minify",
+    "package": "npm run build:min && vsce package --no-dependencies",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "@types/vscode": "^1.90.0",
+    "@vscode/vsce": "^4.1.1",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "prettier": "^3.10.1",
+    "tm-grammars": "^1.32.22",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
+  }
+}

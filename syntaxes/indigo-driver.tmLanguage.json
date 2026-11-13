@@ -1,0 +1,411 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "INDIGO Driver Definition",
+  "scopeName": "source.indigo-driver",
+  "fileTypes": ["driver"],
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#driver"
+    }
+  ],
+  "injections": {
+    "L:meta.embedded.block.c - (comment | string)": {
+      "patterns": [
+        {
+          "include": "#indigo-api"
+        }
+      ]
+    }
+  },
+  "repository": {
+    "comment": {
+      "match": "//.*$",
+      "name": "comment.line.double-slash.indigo-driver"
+    },
+    "driver": {
+      "begin": "\\b(driver)\\s+([A-Za-z][A-Za-z0-9_]*)\\s*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.driver.indigo-driver"
+        },
+        "2": {
+          "name": "entity.name.type.driver.indigo-driver"
+        },
+        "3": {
+          "name": "punctuation.section.block.begin.indigo-driver"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.indigo-driver"
+        }
+      },
+      "name": "meta.driver.indigo-driver",
+      "patterns": [
+        {
+          "include": "#body"
+        }
+      ]
+    },
+    "body": {
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "include": "#code-block"
+        },
+        {
+          "include": "#device"
+        },
+        {
+          "include": "#property"
+        },
+        {
+          "include": "#item"
+        },
+        {
+          "include": "#transport"
+        },
+        {
+          "include": "#sub-block"
+        },
+        {
+          "include": "#attribute"
+        },
+        {
+          "match": "[;{}]",
+          "name": "punctuation.terminator.indigo-driver"
+        }
+      ]
+    },
+    "code-block": {
+      "begin": "\\b(on_change_request|on_change|on_init|on_shutdown|on_attach|on_detach|on_connect|on_disconnect|on_timer|unplug_match|unplug|plug|discover|include|define|data|code)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.control.code-block.indigo-driver"
+        },
+        "2": {
+          "name": "punctuation.section.block.begin.indigo-driver"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.indigo-driver"
+        }
+      },
+      "name": "meta.code-block.indigo-driver",
+      "contentName": "meta.embedded.block.c",
+      "patterns": [
+        {
+          "include": "source.c"
+        }
+      ]
+    },
+    "indigo-api": {
+      "patterns": [
+        {
+          "match": "\\b(PRIVATE_DATA|DRIVER_NAME|DRIVER_LABEL|DRIVER_VERSION|MAX_DEVICES|connection_result|plug_result|unplug_result)\\b",
+          "name": "variable.language.indigo-driver"
+        },
+        {
+          "match": "\\b(?:INDIGO_[A-Z0-9_]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_(?:PROPERTY|ITEM)(?:_NAME)?)\\b",
+          "name": "support.constant.indigo.indigo-driver"
+        },
+        {
+          "match": "\\bindigo_[a-z0-9_]+(?=\\s*\\()",
+          "name": "support.function.indigo.indigo-driver"
+        }
+      ]
+    },
+    "device": {
+      "patterns": [
+        {
+          "match": "\\b(ccd|wheel|focuser|mount|guider|rotator|dome|gps|ao|aux|polaralign)\\s*(;)",
+          "captures": {
+            "1": {
+              "name": "storage.type.device.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.terminator.indigo-driver"
+            }
+          }
+        },
+        {
+          "begin": "\\b(ccd|wheel|focuser|mount|guider|rotator|dome|gps|ao|aux|polaralign)\\b\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.device.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.device.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        }
+      ]
+    },
+    "property": {
+      "patterns": [
+        {
+          "match": "\\b(inherited|switch|text|number|light)\\s+([A-Za-z][A-Za-z0-9_]*)\\s*(;)",
+          "captures": {
+            "1": {
+              "name": "storage.type.property.indigo-driver"
+            },
+            "2": {
+              "name": "entity.name.function.property.indigo-driver"
+            },
+            "3": {
+              "name": "punctuation.terminator.indigo-driver"
+            }
+          }
+        },
+        {
+          "begin": "\\b(inherited|switch|text|number|light)\\s+(X_[A-Za-z0-9_]*)\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.property.indigo-driver"
+            },
+            "2": {
+              "name": "entity.name.function.custom-property.indigo-driver"
+            },
+            "3": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.property.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        },
+        {
+          "begin": "\\b(inherited|switch|text|number|light)\\s+([A-Za-z][A-Za-z0-9_]*)\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.property.indigo-driver"
+            },
+            "2": {
+              "name": "entity.name.function.property.indigo-driver"
+            },
+            "3": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.property.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        }
+      ]
+    },
+    "item": {
+      "patterns": [
+        {
+          "match": "\\b(item)\\s+([A-Za-z][A-Za-z0-9_]*)\\s*(;)",
+          "captures": {
+            "1": {
+              "name": "storage.type.item.indigo-driver"
+            },
+            "2": {
+              "name": "variable.other.item.indigo-driver"
+            },
+            "3": {
+              "name": "punctuation.terminator.indigo-driver"
+            }
+          }
+        },
+        {
+          "begin": "\\b(item)\\s+([A-Za-z][A-Za-z0-9_]*)\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.item.indigo-driver"
+            },
+            "2": {
+              "name": "variable.other.item.indigo-driver"
+            },
+            "3": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.item.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        }
+      ]
+    },
+    "transport": {
+      "patterns": [
+        {
+          "match": "\\b(serial|hid|libusb|sdk)\\s*(;)",
+          "captures": {
+            "1": {
+              "name": "storage.type.transport.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.terminator.indigo-driver"
+            }
+          }
+        },
+        {
+          "begin": "\\b(serial|hid|libusb|sdk)\\b\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.transport.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.transport.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        }
+      ]
+    },
+    "sub-block": {
+      "patterns": [
+        {
+          "match": "\\b(pattern)\\s*(;)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.sub-block.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.terminator.indigo-driver"
+            }
+          }
+        },
+        {
+          "begin": "\\b(pattern|reject_change)\\b\\s*(\\{)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.sub-block.indigo-driver"
+            },
+            "2": {
+              "name": "punctuation.section.block.begin.indigo-driver"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.section.block.end.indigo-driver"
+            }
+          },
+          "name": "meta.sub-block.indigo-driver",
+          "patterns": [
+            {
+              "include": "#body"
+            }
+          ]
+        }
+      ]
+    },
+    "attribute": {
+      "begin": "\\b([A-Za-z][A-Za-z0-9_]*)\\s*(=)",
+      "beginCaptures": {
+        "1": {
+          "name": "variable.other.attribute.indigo-driver"
+        },
+        "2": {
+          "name": "keyword.operator.assignment.indigo-driver"
+        }
+      },
+      "end": "(;)|(?=\\})",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.terminator.indigo-driver"
+        }
+      },
+      "name": "meta.attribute.indigo-driver",
+      "contentName": "meta.expression.indigo-driver",
+      "patterns": [
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "match": "\"(?:\\\\.|[^\"\\\\])*\"",
+          "name": "string.quoted.double.indigo-driver"
+        },
+        {
+          "match": "'(?:\\\\.|[^'\\\\])*'",
+          "name": "string.quoted.single.indigo-driver"
+        },
+        {
+          "match": "\\b(true|false)\\b",
+          "name": "constant.language.boolean.indigo-driver"
+        },
+        {
+          "match": "\\b(?:0[xX][0-9a-fA-F]+|[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)[uUlLfF]*\\b",
+          "name": "constant.numeric.indigo-driver"
+        },
+        {
+          "match": "\\b(?:INDIGO_[A-Z0-9_]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_(?:PROPERTY|ITEM)(?:_NAME)?|MAIN_GROUP|[A-Z][A-Z0-9]*_GROUP)\\b",
+          "name": "support.constant.indigo.indigo-driver"
+        },
+        {
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()",
+          "name": "support.function.indigo-driver"
+        },
+        {
+          "match": "->|\\.|[-+*/%&|^~!<>?:]+",
+          "name": "keyword.operator.indigo-driver"
+        }
+      ]
+    }
+  }
+}

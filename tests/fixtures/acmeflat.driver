@@ -1,0 +1,82 @@
+// ACME Flat Panel driver definition
+
+driver acmeflat {
+	label = "ACME Flat Panel";
+	author = "Example Author <author@example.com>";
+	copyright = "Copyright (c) 2026 Example Author";
+	version = 1;
+	serial {
+		pattern {
+			vid = 0x0403;
+			pid = 0x6001;
+		}
+		pattern;
+	}
+	data {
+		char response[32];
+	}
+	code {
+		#define POLL_INTERVAL 5
+
+		static bool acmeflat_command(indigo_device *device, const char *command) {
+			return indigo_uni_printf(PRIVATE_DATA->handle, "%s}\n", command) > 0; // } in string and comment
+		}
+
+		static bool acmeflat_open(indigo_device *device, const char **error_message) {
+			PRIVATE_DATA->handle = indigo_uni_open_serial_with_speed2(DEVICE_PORT_ITEM->text.value, 9600, INDIGO_LOG_DEBUG, error_message);
+			return PRIVATE_DATA->handle != NULL;
+		}
+
+		static void acmeflat_close(indigo_device *device) {
+			indigo_uni_close(&PRIVATE_DATA->handle);
+		}
+	}
+	aux {
+		name = "ACME Flat Panel";
+		interface = INDIGO_INTERFACE_AUX_LIGHTBOX;
+		on_connect {
+			connection_result = acmeflat_command(device, "V");
+			if (!connection_result) {
+				acmeflat_close(device);
+			}
+		}
+		switch AUX_LIGHT_SWITCH {
+			name = AUX_LIGHT_SWITCH_PROPERTY_NAME;
+			group = AUX_MAIN_GROUP;
+			label = "Light (on/off)";
+			on_change {
+				acmeflat_command(device, AUX_LIGHT_SWITCH_ON_ITEM->sw.value ? "L1" : "L0");
+			}
+			item AUX_LIGHT_SWITCH_ON {
+				name = AUX_LIGHT_SWITCH_ON_ITEM_NAME;
+				label = "On";
+			}
+			item AUX_LIGHT_SWITCH_OFF;
+		}
+		number AUX_LIGHT_INTENSITY {
+			name = AUX_LIGHT_INTENSITY_PROPERTY_NAME;
+			label = "Light intensity";
+			persistent = true;
+			reject_change {
+				condition = AUX_LIGHT_SWITCH_PROPERTY->state == INDIGO_BUSY_STATE;
+				message = "Light switch in progress";
+			}
+			on_change { }
+			item AUX_LIGHT_INTENSITY {
+				name = AUX_LIGHT_INTENSITY_ITEM_NAME;
+				label = "Intensity [%]";
+				max = 100;
+				format = "%.0f";
+			}
+		}
+		text X_INFO {
+			name = "X_INFO";
+			label = "Device info";
+			perm = INDIGO_RO_PERM;
+			item X_INFO_FIRMWARE {
+				name = "FIRMWARE";
+				label = "Firmware";
+			}
+		}
+	}
+}
