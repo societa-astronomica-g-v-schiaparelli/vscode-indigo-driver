@@ -2,7 +2,7 @@
   "name": "indigo-driver",
   "displayName": "INDIGO Driver Definition",
   "description": "Syntax highlighting, snippets, outline, diagnostics and generator integration for INDIGO 3 .driver definition files.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "publisher": "societa-astronomica-schiaparelli",
@@ -80,6 +80,16 @@
         "command": "indigoDriver.openGenerated",
         "title": "Open Generated C Source",
         "category": "INDIGO Driver"
+      },
+      {
+        "command": "indigoDriver.useAsCppProvider",
+        "title": "Use as C/C++ Configuration Provider",
+        "category": "INDIGO Driver"
+      },
+      {
+        "command": "indigoDriver.stopUsingAsCppProvider",
+        "title": "Stop Using as C/C++ Configuration Provider",
+        "category": "INDIGO Driver"
       }
     ],
     "menus": {
@@ -119,6 +129,19 @@
           "type": "boolean",
           "default": true,
           "description": "Report syntax, structural and semantic problems in .driver files while typing. When off, no diagnostics are shown."
+        },
+        "indigoDriver.cLanguageFeatures": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Completion, hover, go to definition and signature help inside the C code blocks, provided by the C/C++ extension on a generated copy of the driver. Needs `indigo_generator` and the Microsoft C/C++ extension."
+        },
+        "indigoDriver.includePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "markdownDescription": "Extra include directories for the C code blocks, besides `/usr/include` and `/usr/local/include` which the C/C++ extension finds by itself. `~` and `${workspaceFolder}` are expanded. They reach the C/C++ extension only once INDIGO Driver is its configuration provider: run *INDIGO Driver: Use as C/C++ Configuration Provider* (it writes `C_Cpp.default.configurationProvider` to the workspace settings, and *Stop Using...* removes it)."
         }
       }
     },
@@ -127,7 +150,8 @@
         "editor.insertSpaces": false,
         "editor.tabSize": 2,
         "editor.detectIndentation": false,
-        "files.trimTrailingWhitespace": true
+        "files.trimTrailingWhitespace": true,
+        "editor.defaultFormatter": "societa-astronomica-schiaparelli.indigo-driver"
       }
     }
   },
@@ -154,6 +178,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.2",
     "vitest": "^5.1.0",
+    "vscode-cpptools": "^7.1.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   }

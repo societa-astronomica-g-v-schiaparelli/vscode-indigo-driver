@@ -1,10 +1,14 @@
-import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 
 import * as vscode from "vscode";
 
 import { generatedSourceName } from "./analysis";
+import { DriverCLanguageProvider } from "./cLanguage";
+import { cleanStorage } from "./cleanup";
+import { CppToolsIntegration } from "./cppTools";
+import { DriverFormattingProvider } from "./formatting";
+import { runGenerator } from "./generate";
 import { generatorErrorLine, parseGeneratorErrors } from "./generatorOutput";
 import {
   AnalysisCache,
@@ -15,14 +19,17 @@ import {
   DriverSymbolProvider,
   LANGUAGE_ID,
 } from "./providers";
+import { ShadowSource } from "./shadow";
 
 /** Runs indigo_generator on a .driver file and reports its errors as diagnostics. */
 class GeneratorRunner implements vscode.Disposable {
   #diagnostics = vscode.languages.createDiagnosticCollection("indigo_generator");
-  #output = vscode.window.createOutputChannel("INDIGO Driver");
   #running = new Set<string>();
 
-  constructor(private readonly cache: AnalysisCache) {}
+  constructor(
+    private readonly cache: AnalysisCache,
+    private readonly output: vscode.OutputChannel,
+  ) {}
 
   clear(document: vscode.TextDocument) {
     this.#diagnostics.delete(document.uri);
@@ -57,21 +64,9 @@ class GeneratorRunner implements vscode.Disposable {
     const version = document.version;
     const configured = vscode.workspace.getConfiguration("indigoDriver", document.uri).get<string>("generatorPath", "");
     const executable = configured.trim() || "indigo_generator";
-    this.#output.appendLine(`$ ${executable} ${document.fileName}`);
-    const { code, output, missing } = await new Promise<{ code: number; output: string; missing: boolean }>(
-      (resolve) => {
-        execFile(executable, [document.fileName], { cwd: dirname(document.fileName) }, (error, stdout, stderr) => {
-          const failure = error as (NodeJS.ErrnoException & { code?: number | string }) | null;
-          const text = `${stdout}${stderr}`;
-          resolve({
-            code: failure ? (typeof failure.code === "number" ? failure.code : 1) : 0,
-            output: failure && text.trim() === "" ? failure.message : text,
-            missing: failure?.code === "ENOENT",
-          });
-        });
-      },
-    );
-    this.#output.appendLine(output.trimEnd());
+    this.output.appendLine(`$ ${executable} ${document.fileName}`);
+    const { code, output, missing } = await runGenerator(executable, document.fileName, dirname(document.fileName));
+    this.output.appendLine(output.trimEnd());
     if (missing) {
       const choice = await vscode.window.showErrorMessage(
         `Cannot run '${executable}'. Build indigo_generator and set 'indigoDriver.generatorPath'.`,
@@ -100,7 +95,7 @@ class GeneratorRunner implements vscode.Disposable {
       );
     }
     if (code !== 0 || errors.length > 0) {
-      this.#output.show(true);
+      this.output.show(true);
       vscode.window.showErrorMessage(`indigo_generator failed on ${basename(document.fileName)}.`);
       return;
     }
@@ -131,15 +126,20 @@ class GeneratorRunner implements vscode.Disposable {
 
   dispose() {
     this.#diagnostics.dispose();
-    this.#output.dispose();
   }
 }
 
 export function activate(context: vscode.ExtensionContext) {
   const cache = new AnalysisCache();
   const diagnostics = new DriverDiagnostics(cache);
-  const runner = new GeneratorRunner(cache);
+  const output = vscode.window.createOutputChannel("INDIGO Driver");
+  const runner = new GeneratorRunner(cache, output);
+  const shadow = new ShadowSource(context.globalStorageUri, cache, output);
+  const cppTools = new CppToolsIntegration(context, shadow, output);
+  const cLanguage = new DriverCLanguageProvider(cache, shadow);
+  const formatting = new DriverFormattingProvider(cache, context.globalStorageUri);
   const selector: vscode.DocumentSelector = { language: LANGUAGE_ID };
+  const report = (what: string) => (error: unknown) => output.appendLine(`${what}: ${error}`);
 
   const activeDriver = () => {
     const document = vscode.window.activeTextEditor?.document;
@@ -151,8 +151,16 @@ export function activate(context: vscode.ExtensionContext) {
   };
 
   context.subscriptions.push(
+    output,
     diagnostics,
     runner,
+    cppTools,
+    vscode.languages.registerDocumentFormattingEditProvider(selector, formatting),
+    vscode.languages.registerDocumentRangeFormattingEditProvider(selector, formatting),
+    vscode.languages.registerCompletionItemProvider(selector, cLanguage, ".", ">"),
+    vscode.languages.registerHoverProvider(selector, cLanguage),
+    vscode.languages.registerDefinitionProvider(selector, cLanguage),
+    vscode.languages.registerSignatureHelpProvider(selector, cLanguage, "(", ","),
     vscode.languages.registerDocumentSymbolProvider(selector, new DriverSymbolProvider(cache)),
     vscode.languages.registerFoldingRangeProvider(selector, new DriverFoldingProvider(cache)),
     vscode.languages.registerCompletionItemProvider(selector, new DriverCompletionProvider(cache)),
@@ -161,6 +169,8 @@ export function activate(context: vscode.ExtensionContext) {
       const document = activeDriver();
       return document ? runner.run(document) : undefined;
     }),
+    vscode.commands.registerCommand("indigoDriver.useAsCppProvider", () => cppTools.useAsProvider()),
+    vscode.commands.registerCommand("indigoDriver.stopUsingAsCppProvider", () => cppTools.stopUsingAsProvider()),
     vscode.commands.registerCommand("indigoDriver.openGenerated", () => {
       const document = activeDriver();
       return document ? runner.openGenerated(document) : undefined;
@@ -174,6 +184,9 @@ export function activate(context: vscode.ExtensionContext) {
       diagnostics.clear(document);
       runner.clear(document);
       cache.delete(document);
+      if (document.languageId === LANGUAGE_ID) {
+        shadow.evict(document).catch(report("Releasing the generated copy failed"));
+      }
     }),
     vscode.workspace.onDidSaveTextDocument((document) => {
       const enabled = vscode.workspace
@@ -187,9 +200,22 @@ export function activate(context: vscode.ExtensionContext) {
       if (event.affectsConfiguration("indigoDriver.lint.enable")) {
         vscode.workspace.textDocuments.forEach((document) => diagnostics.refresh(document));
       }
+      if (
+        event.affectsConfiguration("indigoDriver.cLanguageFeatures") ||
+        event.affectsConfiguration("indigoDriver.includePaths")
+      ) {
+        cppTools.refresh().catch(report("The C/C++ integration failed"));
+      }
+      if (event.affectsConfiguration("indigoDriver.generatorPath")) {
+        shadow.resetFailures();
+      }
     }),
   );
   vscode.workspace.textDocuments.forEach((document) => diagnostics.refresh(document));
+  cppTools.refresh().catch(report("The C/C++ integration failed"));
+  cleanStorage(context.globalStorageUri.fsPath)
+    .then((removed) => removed > 0 && output.appendLine(`Removed ${removed} generated files not used for 30 days.`))
+    .catch(report("Cleaning the storage folder failed"));
 }
 
 export function deactivate() {}

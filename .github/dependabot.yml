@@ -11,3 +11,6 @@ updates:
     ignore:
       # Must match engines.vscode: vsce refuses a newer @types/vscode.
       - dependency-name: "@types/vscode"
+      # Must match engines.node and .nvmrc.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]

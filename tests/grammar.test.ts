@@ -88,8 +88,57 @@ describe("grammar", () => {
   it("embeds C in code blocks", () => {
     expect(scopesOf(source, "static")).toContain("meta.embedded.block.c");
     expect(scopesOf(source, "static")).toContain("storage.modifier.c");
-    expect(scopesOf(source, "indigo_update_property")).toContain("support.function.indigo.indigo-driver");
-    expect(scopesOf(source, "PRIVATE_DATA")).toContain("variable.language.indigo-driver");
+    expect(scopesOf(source, "indigo_update_property")).toContain("entity.name.function.indigo-driver");
+    expect(scopesOf(source, "PRIVATE_DATA")).toContain("entity.name.function.preprocessor.indigo-driver");
+  });
+
+  describe("INDIGO names in code blocks", () => {
+    const code = `driver d {
+	aux {
+		on_connect {
+			indigo_device *client_device = device;
+			indigo_result result = INDIGO_OK;
+			uint32_t flags = INDIGO_INTERFACE_AUX_GPIO | MY_OWN_FLAG;
+			AUX_LIGHT_SWITCH_PROPERTY->state = INDIGO_BUSY_STATE;
+			indigo_update_property(device, AUX_LIGHT_SWITCH_PROPERTY, NULL);
+			connection_result = false;
+			/* device INDIGO_OK_STATE */
+			printf("device INDIGO_OK_STATE");
+		}
+	}
+}`;
+    const scopes = (word: string) => scopesOf(code, word);
+
+    it("colors enumerators like the language server does, and other capitals as macros", () => {
+      expect(scopes("INDIGO_OK")).toContain("variable.other.enummember.indigo-driver");
+      expect(scopes("INDIGO_INTERFACE_AUX_GPIO")).toContain("variable.other.enummember.indigo-driver");
+      expect(scopes("INDIGO_BUSY_STATE")).toContain("variable.other.enummember.indigo-driver");
+      expect(scopes("MY_OWN_FLAG")).toContain("entity.name.function.preprocessor.indigo-driver");
+      expect(scopes("AUX_LIGHT_SWITCH_PROPERTY")).toContain("entity.name.function.preprocessor.indigo-driver");
+    });
+
+    it("colors INDIGO types, standard _t types, functions, variables and the device parameter", () => {
+      expect(scopes("indigo_device")).toContain("entity.name.type.indigo-driver");
+      expect(scopes("indigo_result")).toContain("entity.name.type.indigo-driver");
+      expect(scopes("uint32_t")).toContain("entity.name.type.indigo-driver");
+      expect(scopes("indigo_update_property")).toContain("entity.name.function.indigo-driver");
+      expect(scopes("connection_result")).toContain("variable.other.readwrite.indigo-driver");
+    });
+
+    it("colors the device parameter, but not the word inside comments and strings", () => {
+      expect(scopes("device")).toContain("variable.parameter.indigo-driver");
+      const text = code.split("\n");
+      let state = INITIAL;
+      for (const line of text.slice(0, 11)) {
+        state = grammar.tokenizeLine(line, state).ruleStack;
+      }
+      const comment = grammar.tokenizeLine(text[10], state);
+      expect(
+        comment.tokens.some((t) =>
+          t.scopes.some((s) => s.endsWith(".indigo-driver") && /enummember|parameter|preprocessor/.test(s)),
+        ),
+      ).toBe(false);
+    });
   });
 
   it("handles bodiless forms and a missing semicolon before a closing brace", () => {

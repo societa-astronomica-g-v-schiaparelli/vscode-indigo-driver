@@ -110,16 +110,25 @@
     "indigo-api": {
       "patterns": [
         {
-          "match": "\\b(PRIVATE_DATA|DRIVER_NAME|DRIVER_LABEL|DRIVER_VERSION|MAX_DEVICES|connection_result|plug_result|unplug_result)\\b",
-          "name": "variable.language.indigo-driver"
+          "include": "#indigo-enumerators"
         },
         {
-          "match": "\\b(?:INDIGO_[A-Z0-9_]+|[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_(?:PROPERTY|ITEM)(?:_NAME)?)\\b",
-          "name": "support.constant.indigo.indigo-driver"
+          "include": "#indigo-types"
         },
         {
-          "match": "\\bindigo_[a-z0-9_]+(?=\\s*\\()",
-          "name": "support.function.indigo.indigo-driver"
+          "include": "#indigo-functions"
+        },
+        {
+          "include": "#indigo-variables"
+        },
+        {
+          "include": "#macros"
+        },
+        {
+          "include": "#standard-types"
+        },
+        {
+          "include": "#handler-parameters"
         }
       ]
     },
@@ -406,6 +415,42 @@
           "name": "keyword.operator.indigo-driver"
         }
       ]
+    },
+    "indigo-enumerators": {
+      "match": "\\b(?:CCD_JPEG_STRETCH_COUNT|CCD_JPEG_STRETCH_HARD|CCD_JPEG_STRETCH_MODERATE|CCD_JPEG_STRETCH_NORMAL|CCD_JPEG_STRETCH_SLIGHT|INDIGO_ALERT_STATE|INDIGO_ANY_OF_MANY_RULE|INDIGO_AT_MOST_ONE_RULE|INDIGO_BLOB_VECTOR|INDIGO_BUSY|INDIGO_BUSY_STATE|INDIGO_CANT_START_SERVER|INDIGO_COM_HANDLE|INDIGO_DRIVER_INFO|INDIGO_DRIVER_INIT|INDIGO_DRIVER_SHUTDOWN|INDIGO_DUPLICATED|INDIGO_ENABLE_BLOB_ALSO|INDIGO_ENABLE_BLOB_NEVER|INDIGO_ENABLE_BLOB_URL|INDIGO_FAILED|INDIGO_FILE_HANDLE|INDIGO_FITS_LOGICAL|INDIGO_FITS_NUMBER|INDIGO_FITS_STRING|INDIGO_GUIDER_PHASE_CLEARING_DEC|INDIGO_GUIDER_PHASE_CLEARING_RA|INDIGO_GUIDER_PHASE_DONE|INDIGO_GUIDER_PHASE_FAILED|INDIGO_GUIDER_PHASE_GUIDING|INDIGO_GUIDER_PHASE_IGNORE|INDIGO_GUIDER_PHASE_INITIALIZING|INDIGO_GUIDER_PHASE_MOVING_EAST|INDIGO_GUIDER_PHASE_MOVING_NORTH|INDIGO_GUIDER_PHASE_MOVING_SOUTH|INDIGO_GUIDER_PHASE_MOVING_WEST|INDIGO_GUIDER_PHASE_PREVIEWING|INDIGO_GUIDE_ERROR|INDIGO_IDLE_STATE|INDIGO_IMAGER_PHASE_CALIBRATING|INDIGO_IMAGER_PHASE_CAPTURING|INDIGO_IMAGER_PHASE_DITHERING|INDIGO_IMAGER_PHASE_FOCUSING|INDIGO_IMAGER_PHASE_IDLE|INDIGO_IMAGER_PHASE_ROTATING|INDIGO_IMAGER_PHASE_SETTING_FILTER|INDIGO_IMAGER_PHASE_SLEWING|INDIGO_IMAGER_PHASE_WAITING|INDIGO_INTERFACE_AGENT|INDIGO_INTERFACE_AO|INDIGO_INTERFACE_AUX|INDIGO_INTERFACE_AUX_DUSTCAP|INDIGO_INTERFACE_AUX_GPIO|INDIGO_INTERFACE_AUX_JOYSTICK|INDIGO_INTERFACE_AUX_LIGHTBOX|INDIGO_INTERFACE_AUX_POWERBOX|INDIGO_INTERFACE_AUX_SHUTTER|INDIGO_INTERFACE_AUX_SQM|INDIGO_INTERFACE_AUX_WEATHER|INDIGO_INTERFACE_CCD|INDIGO_INTERFACE_DOME|INDIGO_INTERFACE_FOCUSER|INDIGO_INTERFACE_GPS|INDIGO_INTERFACE_GUIDER|INDIGO_INTERFACE_MOUNT|INDIGO_INTERFACE_POLARALIGN|INDIGO_INTERFACE_ROTATOR|INDIGO_INTERFACE_WHEEL|INDIGO_LIGHT_VECTOR|INDIGO_LOCK_ERROR|INDIGO_LOG_DEBUG|INDIGO_LOG_ERROR|INDIGO_LOG_INFO|INDIGO_LOG_NONE|INDIGO_LOG_PLAIN|INDIGO_LOG_TRACE|INDIGO_LOG_TRACE_BUS|INDIGO_NOT_FOUND|INDIGO_NUMBER_VECTOR|INDIGO_OK|INDIGO_OK_STATE|INDIGO_ONE_OF_MANY_RULE|INDIGO_POLAR_ALIGN_IDLE|INDIGO_POLAR_ALIGN_IN_PROGRESS|INDIGO_POLAR_ALIGN_RECALCULATE|INDIGO_POLAR_ALIGN_REFERENCE_1|INDIGO_POLAR_ALIGN_REFERENCE_2|INDIGO_POLAR_ALIGN_REFERENCE_3|INDIGO_POLAR_ALIGN_START|INDIGO_PROTOCOL_TCP|INDIGO_PROTOCOL_UDP|INDIGO_RAW_ABGR32|INDIGO_RAW_MONO16|INDIGO_RAW_MONO8|INDIGO_RAW_RGB24|INDIGO_RAW_RGB48|INDIGO_RAW_RGBA32|INDIGO_RO_PERM|INDIGO_RW_PERM|INDIGO_SERVICE_ADDED|INDIGO_SERVICE_ADDED_GROUPED|INDIGO_SERVICE_END_OF_RECORD|INDIGO_SERVICE_REMOVED|INDIGO_SERVICE_REMOVED_GROUPED|INDIGO_SOLVER_STATE_CENTERING|INDIGO_SOLVER_STATE_GOTO|INDIGO_SOLVER_STATE_IDLE|INDIGO_SOLVER_STATE_SOLVING|INDIGO_SOLVER_STATE_SYNCING|INDIGO_SOLVER_STATE_WAITING_FOR_IMAGE|INDIGO_SWITCH_VECTOR|INDIGO_TCP_HANDLE|INDIGO_TEXT_VECTOR|INDIGO_TOO_MANY_ELEMENTS|INDIGO_UDP_HANDLE|INDIGO_UNRESOLVED_DEPS|INDIGO_UNSUPPORTED_ARCH|INDIGO_VERSION_2_0|INDIGO_VERSION_3_0|INDIGO_VERSION_CURRENT|INDIGO_VERSION_LEGACY|INDIGO_VERSION_NONE|INDIGO_WO_PERM)\\b",
+      "name": "variable.other.enummember.indigo-driver"
+    },
+    "indigo-types": {
+      "patterns": [
+        {
+          "match": "\\b(?:ccd_jpeg_stretch_level|indigo_adapter_context|indigo_agent_context|indigo_alignment_point|indigo_ao_context|indigo_bahtinov_result|indigo_blob_entry|indigo_ccd_context|indigo_client|indigo_client_ref|indigo_device|indigo_device_context|indigo_device_interface|indigo_device_match_pattern|indigo_dome_context|indigo_driver_action|indigo_driver_entry|indigo_driver_info|indigo_dslr_raw_image_info_s|indigo_dslr_raw_image_s|indigo_enable_blob_mode|indigo_enable_blob_mode_record|indigo_filter_context|indigo_fits_keyword|indigo_fits_keyword_type|indigo_focuser_context|indigo_frame_digest|indigo_gp_guider|indigo_gps_context|indigo_guide_algorithm|indigo_guider_context|indigo_item|indigo_linear_trend_history|indigo_log_levels|indigo_mount_context|indigo_network_protocol|indigo_platesolver_task|indigo_polaralign_context|indigo_property|indigo_property_perm|indigo_property_state|indigo_property_type|indigo_psf_param|indigo_queue|indigo_queue_task|indigo_raw_header|indigo_raw_type|indigo_resist_switch_history|indigo_result|indigo_rotator_context|indigo_rule|indigo_ser|indigo_serial_info|indigo_server_entry|indigo_service_discovery_event|indigo_simulated_mount_state|indigo_star_detection|indigo_subprocess_entry|indigo_tiff_memory_handle|indigo_timer|indigo_token|indigo_uni_handle|indigo_uni_handle_type|indigo_uni_worker_data|indigo_version|indigo_wheel_context|platesolver_private_data)\\b",
+          "name": "entity.name.type.indigo-driver"
+        },
+        {
+          "match": "\\bindigo_[a-z0-9_]+(?=\\s*\\*+\\s*[A-Za-z_(])",
+          "name": "entity.name.type.indigo-driver"
+        }
+      ]
+    },
+    "indigo-functions": {
+      "match": "\\bindigo_[a-z0-9_]+(?=\\s*\\()",
+      "name": "entity.name.function.indigo-driver"
+    },
+    "indigo-variables": {
+      "match": "\\b(?:connection_result|plug_result|unplug_result)\\b",
+      "name": "variable.other.readwrite.indigo-driver"
+    },
+    "macros": {
+      "match": "\\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\\b",
+      "name": "entity.name.function.preprocessor.indigo-driver"
+    },
+    "standard-types": {
+      "match": "\\b[a-z][a-z0-9_]*_t\\b",
+      "name": "entity.name.type.indigo-driver"
+    },
+    "handler-parameters": {
+      "match": "(?<!->|\\.)\\bdevice\\b",
+      "name": "variable.parameter.indigo-driver"
     }
   }
 }
