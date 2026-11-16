@@ -175,7 +175,7 @@
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "prettier": "^3.10.1",
     "tm-grammars": "^1.32.22",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.72.2",
     "vitest": "^5.1.0",
     "vscode-cpptools": "^7.1.1",
