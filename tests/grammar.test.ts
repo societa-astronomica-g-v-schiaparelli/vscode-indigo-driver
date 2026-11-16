@@ -92,6 +92,36 @@ describe("grammar", () => {
     expect(scopesOf(source, "PRIVATE_DATA")).toContain("entity.name.function.preprocessor.indigo-driver");
   });
 
+  it("keeps the code block open across try and catch", () => {
+    const text = `driver d {
+	code {
+		static bool parse(int *out) {
+			try {
+				*out = 1;
+				return true;
+			} catch (const std::exception &e) {
+				return false;
+			}
+		}
+	}
+	aux {
+	}
+}`.split("\n");
+    let state = INITIAL;
+    const tokens = text.map((line) => {
+      const result = grammar.tokenizeLine(line, state);
+      state = result.ruleStack;
+      return { line, result };
+    });
+    const catchLine = tokens[6];
+    const catchToken = catchLine.result.tokens.find((t) => catchLine.line.slice(t.startIndex, t.endIndex) === "catch");
+    expect(catchToken?.scopes).toContain("keyword.control.exception.indigo-driver");
+    // the code block closes at its own brace: what follows is the driver structure again
+    const aux = tokens[11].result.tokens.find((t) => tokens[11].line.slice(t.startIndex, t.endIndex) === "aux");
+    expect(aux?.scopes).toContain("storage.type.device.indigo-driver");
+    expect(aux?.scopes).not.toContain("meta.embedded.block.c");
+  });
+
   describe("INDIGO names in code blocks", () => {
     const code = `driver d {
 	aux {

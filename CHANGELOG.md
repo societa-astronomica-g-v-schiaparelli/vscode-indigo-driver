@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- Fixed the highlighting of C++ `try`/`catch` in code blocks: the embedded C grammar read `} catch (...) {` as a function definition, lost a nesting level and ended the code block early, so the rest of the file was colored wrong.
+
 ## 0.2.0
 
 - C language features inside code blocks, through the C/C++ extension on a generated copy of the driver: completion,

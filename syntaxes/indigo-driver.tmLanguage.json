@@ -15,12 +15,24 @@
     "L:meta.embedded.block.c - (comment | string)": {
       "patterns": [
         {
+          "include": "#cpp-exceptions"
+        },
+        {
           "include": "#indigo-api"
         }
       ]
     }
   },
   "repository": {
+    "cpp-exceptions": {
+      "comment": "source.c reads `} catch (...) {` as a function definition that swallows the brace, loses a nesting level and ends the code block early. Matched here first, at the whitespace where the C rule starts.",
+      "match": "\\s*\\b(try|catch|throw)\\b(?=\\s*[({;]|\\s*$)",
+      "captures": {
+        "1": {
+          "name": "keyword.control.exception.indigo-driver"
+        }
+      }
+    },
     "comment": {
       "match": "//.*$",
       "name": "comment.line.double-slash.indigo-driver"

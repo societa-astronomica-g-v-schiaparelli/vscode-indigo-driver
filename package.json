@@ -2,7 +2,7 @@
   "name": "indigo-driver",
   "displayName": "INDIGO Driver Definition",
   "description": "Syntax highlighting, snippets, outline, diagnostics and generator integration for INDIGO 3 .driver definition files.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "publisher": "societa-astronomica-schiaparelli",
